@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>בונים ארוחת ערב 🍽️</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="top">
+  <h1>🍽️ בונים ארוחת ערב</h1>
+  <div class="top-meta">
+    <div class="week-nav">
+      <button id="btn-week-prev" class="week-arrow" aria-label="שבוע קודם">▶</button>
+      <span id="week-label" class="pill"></span>
+      <button id="btn-week-next" class="week-arrow" aria-label="שבוע הבא">◀</button>
+    </div>
+    <span id="treat-counter" class="pill"></span>
+  </div>
+  <div class="top-actions">
+    <button id="btn-summary" class="icon-btn" title="סיכום השבוע" aria-label="סיכום השבוע">📋</button>
+    <button id="btn-settings" class="icon-btn" title="הגדרות" aria-label="הגדרות">⚙️</button>
+  </div>
+</header>
+
+<nav class="days" id="days" aria-label="ימי השבוע"></nav>
+
+<main class="layout">
+  <section class="plate-section card">
+    <div class="plate-header">
+      <h2 id="day-title"></h2>
+      <button id="btn-clear" class="small-btn">🗑️ לנקות</button>
+    </div>
+    <div class="plate" id="plate"></div>
+    <div class="status" id="status"></div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <section class="foods-section">
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="tabs nutrient-tabs" id="nutrient-tabs" role="tablist"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<!-- settings -->
+<div class="modal hidden" id="modal-settings">
+  <div class="modal-box card">
+    <div class="modal-head">
+      <h2>⚙️ הגדרות</h2>
+      <button class="icon-btn modal-close" aria-label="סגירה">✖️</button>
+    </div>
+    <label class="field">
+      <span>🍕 ערבי פינוק בשבוע</span>
+      <input type="number" id="set-treats" min="0" max="7">
+    </label>
+    <label class="field">
+      <span>🍽️ כמה דברים מקסימום בצלחת</span>
+      <input type="number" id="set-max-items" min="2" max="12">
+    </label>
+    <hr>
+    <button id="btn-reset-week" class="danger-btn">🔄 להתחיל את השבוע מחדש</button>
+  </div>
+</div>
+
+<!-- summary -->
+<div class="modal hidden" id="modal-summary">
+  <div class="modal-box card wide">
+    <div class="modal-head">
+      <h2 id="summary-title">📋 הארוחות של השבוע</h2>
+      <div>
+        <button id="btn-copy" class="small-btn">📄 העתקה</button>
+        <button id="btn-print" class="small-btn">🖨️ הדפסה</button>
+        <button class="icon-btn modal-close" aria-label="סגירה">✖️</button>
+      </div>
+    </div>
+    <div id="summary-body"></div>
+  </div>
+</div>
+
+<div id="confetti" aria-hidden="true"></div>
+<div id="celebrate" class="celebrate hidden" aria-live="polite"></div>
+<div id="toast" class="toast hidden" aria-live="polite"></div>
+
+<script src="foods.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
