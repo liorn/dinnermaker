@@ -39,13 +39,13 @@ const FOODS = [
   // ---- ארוחות שלמות (solo) ----
   { id: 'pizza',       name: 'פיצה',               emoji: '🍕', cat: 'meal', rating: null, solo: true,              n: [1, 0, 3, 1, 0] },
   { id: 'pita-pizza',  name: 'פיתה פיצה',           emoji: '🍕', cat: 'meal', rating: null, solo: true,              n: [1, 0, 3, 1, 0] },
-  { id: 'schnitzel',   name: 'שניצל',              emoji: '🍗', cat: 'meal', rating: null, solo: true,              n: [3, 0, 1, 0, 0] },
   { id: 'chicken',     name: 'עוף בתנור',           emoji: '🍗', cat: 'meal', rating: null, solo: true,              n: [3, 0, 0, 0, 0] },
   { id: 'meatballs',   name: 'קציצות',             emoji: '🍖', cat: 'meal', rating: null, solo: true,              n: [3, 1, 0, 0, 0] },
   { id: 'pancakes',    name: 'פנקייק',             emoji: '🥞', cat: 'meal', rating: null, solo: true, treat: true, n: [1, 0, 3, 0, 0] },
   { id: 'kaiser',      name: 'קייזרשמרן',           emoji: '🥞', cat: 'meal', rating: null, solo: true, treat: true, n: [1, 0, 3, 0, 0] },
 
   // ---- חלבון ----
+  { id: 'schnitzel',   name: 'שניצל',              emoji: '🍗', cat: 'protein', rating: 5,    n: [3, 0, 1, 0, 0] },
   { id: 'tahini',      name: 'טחינה',              emoji: '🥣', cat: 'protein', rating: 4.5,  n: [1, 0, 0, 1, 0] },
   { id: 'scrambled',   name: 'ביצה מקושקשת',       emoji: '🍳', cat: 'protein', rating: 4,    n: [2, 0, 0, 0, 1] },
   { id: 'tuna',        name: 'טונה בשמן זית',       emoji: '🐟', cat: 'protein', rating: 4,    n: [3, 0, 0, 0, 1] },
@@ -76,7 +76,7 @@ const FOODS = [
   { id: 'toast',       name: 'טוסט גבינה צהובה',    emoji: '🥪', cat: 'carbs', rating: null, n: [1, 0, 2, 2, 0] },
   { id: 'potato',      name: 'תפוחי אדמה בתנור',    emoji: '🥔', cat: 'carbs', rating: null, n: [0, 0, 2, 0, 1] },
   { id: 'pasta',       name: 'פסטה',               emoji: '🍝', cat: 'carbs', rating: null, n: [0, 0, 3, 0, 0] },
-  { id: 'rice',        name: 'אורז',               emoji: '🍚', cat: 'carbs', rating: null, n: [0, 0, 3, 0, 0] },
+  { id: 'rice',        name: 'אורז',               emoji: '🍚', cat: 'carbs', rating: 4,    n: [0, 0, 3, 0, 0] },
   { id: 'ptitim',      name: 'פתיתים',             emoji: '🍚', cat: 'carbs', rating: null, n: [0, 0, 3, 0, 0] },
   { id: 'couscous',    name: 'קוסקוס',             emoji: '🍚', cat: 'carbs', rating: null, n: [0, 0, 3, 0, 0] },
   { id: 'bread',       name: 'לחם',                emoji: '🍞', cat: 'carbs', rating: 4.5,  n: [0, 0, 2, 0, 0] },
