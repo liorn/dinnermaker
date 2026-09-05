@@ -70,16 +70,18 @@
 
   const state = loadState();
   const today = new Date();
-  const thisWeekStart = weekStart(today);
+  today.setHours(0, 0, 0, 0);
+  function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  function sameDay(a, b) { return fmt(a) === fmt(b); }
+  function daysFromToday(d) { return Math.round((d - today) / 86400000); }
 
-  // איזה שבוע מוצג: 0 = השבוע, 1 = שבוע הבא וכו'
-  const MIN_OFFSET = -2, MAX_OFFSET = 4;
-  let weekOffset = 0;
+  // היום שנבחר; אפשר לנוע שבועיים אחורה וארבעה שבועות קדימה
+  const MIN_DAYS = -14, MAX_DAYS = 28;
+  let selectedDate = new Date(today);
 
-  function viewWeekStart() { const d = new Date(thisWeekStart); d.setDate(d.getDate() + weekOffset * 7); return d; }
   const normalized = new Set();
-  function getWeek() {
-    const key = fmt(viewWeekStart());
+  function getWeek(date = selectedDate) {
+    const key = fmt(weekStart(date));
     let w = state.plans[key];
     if (!w || !Array.isArray(w.days) || w.days.length !== 7) w = state.plans[key] = { days: [[], [], [], [], [], [], []] };
     if (!normalized.has(key)) {
@@ -90,7 +92,8 @@
     return w;
   }
 
-  let selectedDay = today.getDay();
+  function dayItems(date) { return getWeek(date).days[date.getDay()]; }
+
   let tab = 'all';
   let nutrientFilter = null;   // סינון לפי פס תזונה (id של NUTRIENTS), null = כבוי
 
@@ -100,8 +103,8 @@
   }
 
   // ---------- derived ----------
-  function dayInfo(d) {
-    const items = getWeek().days[d];
+  function dayInfo(date) {
+    const items = dayItems(date);
     const totals = NUTRIENTS.map(() => 0);
     items.forEach(id => FOOD_BY_ID[id].n.forEach((v, i) => { totals[i] += v; }));
     const treat = items.some(id => FOOD_BY_ID[id].treat);
@@ -111,10 +114,15 @@
     const complete = items.length > 0 && !treat && (solo || barsFull);
     return { items, totals, treat, solo, complete, barsFull, empty: items.length === 0 };
   }
-  function treatDaysUsed(exceptDay = -1) {
+  // ימי פינוק בשבוע של היום שנבחר (ראשון–שבת)
+  function treatDaysUsed(exceptDate = null) {
     let c = 0;
-    for (let d = 0; d < 7; d++) if (d !== exceptDay && dayInfo(d).treat) c++;
+    weekDates().forEach(dt => { if (!(exceptDate && sameDay(dt, exceptDate)) && dayInfo(dt).treat) c++; });
     return c;
+  }
+  function weekDates() {
+    const ws = weekStart(selectedDate);
+    return Array.from({ length: 7 }, (_, d) => addDays(ws, d));
   }
   function missingNutrients(info) {
     return NUTRIENTS.filter((n, i) => info.totals[i] < n.target);
@@ -123,14 +131,14 @@
   // ---------- actions ----------
   function addFood(id) {
     const f = FOOD_BY_ID[id];
-    const items = getWeek().days[selectedDay];
-    const info = dayInfo(selectedDay);
+    const items = dayItems(selectedDate);
+    const info = dayInfo(selectedDate);
     const wasComplete = info.complete;
     const s = state.settings;
 
     if (items.includes(id)) { removeFood(id); return; }
 
-    if (f.treat && !info.treat && treatDaysUsed(selectedDay) >= s.treatNights) {
+    if (f.treat && !info.treat && treatDaysUsed(selectedDate) >= s.treatNights) {
       toast(s.treatNights === 0 ? 'אין ערבי פינוק השבוע 🙈' : 'נגמרו ערבי הפינוק לשבוע הזה 🙈');
       shake(id);
       return;
@@ -158,14 +166,14 @@
     render();
     bump(id);
 
-    const now = dayInfo(selectedDay);
+    const now = dayInfo(selectedDate);
     if (f.treat) celebrate(`${f.emoji} ערב פינוק!`);
     else if (f.solo) celebrate(`${f.emoji} ${f.name} להערב!`);
     else if (!wasComplete && now.complete) celebrate('🌟 ארוחה מושלמת! כל הכבוד!');
   }
 
   function removeFood(id) {
-    const items = getWeek().days[selectedDay];
+    const items = dayItems(selectedDate);
     const idx = items.indexOf(id);
     if (idx >= 0) items.splice(idx, 1);
     saveState();
@@ -173,14 +181,13 @@
   }
 
   function clearDay() {
-    getWeek().days[selectedDay] = [];
+    getWeek().days[selectedDate.getDay()] = [];
     saveState();
     render();
   }
 
   // ---------- render ----------
   function render() {
-    renderHeader();
     renderDays();
     renderPlate();
     renderStatus();
@@ -190,31 +197,24 @@
   }
 
   function weekRange() {
-    const start = viewWeekStart(), end = new Date(start);
-    end.setDate(end.getDate() + 6);
-    return `${shortDate(start)} – ${shortDate(end)}`;
+    const start = weekStart(selectedDate);
+    return `${shortDate(start)} – ${shortDate(addDays(start, 6))}`;
   }
   function weekName() {
-    return weekOffset === 0 ? 'השבוע' : weekOffset === 1 ? 'שבוע הבא' : weekOffset === -1 ? 'שבוע שעבר' : '';
-  }
-  function renderHeader() {
-    const name = weekName();
-    $('#week-label').textContent = `📅 ${name ? name + ' · ' : ''}${weekRange()}`;
-    $('#btn-week-prev').disabled = weekOffset <= MIN_OFFSET;
-    $('#btn-week-next').disabled = weekOffset >= MAX_OFFSET;
-    const used = treatDaysUsed();
-    const el = $('#treat-counter');
-    el.textContent = `🥞 פינוקים: ${used}/${state.settings.treatNights}`;
-    el.classList.toggle('warn', used >= state.settings.treatNights);
+    const w = Math.round((weekStart(selectedDate) - weekStart(today)) / (7 * 86400000));
+    return w === 0 ? 'השבוע' : w === 1 ? 'שבוע הבא' : w === -1 ? 'שבוע שעבר' : '';
   }
 
+  // רצועת ימים: היום שנבחר באמצע, שלושה לפניו ושלושה אחריו
   function renderDays() {
     const nav = $('#days');
     nav.innerHTML = '';
-    for (let d = 0; d < 7; d++) {
-      const info = dayInfo(d);
+    for (let o = -3; o <= 3; o++) {
+      const date = addDays(selectedDate, o);
+      const info = dayInfo(date);
+      const isToday = sameDay(date, today);
       const btn = document.createElement('button');
-      btn.className = 'day' + (d === selectedDay ? ' active' : '') + (info.complete ? ' done' : '') + (info.treat ? ' treat' : '');
+      btn.className = 'day' + (o === 0 ? ' active' : '') + (isToday ? ' today' : '') + (info.complete ? ' done' : '') + (info.treat ? ' treat' : '');
       const uniq = [...new Set(info.items)].slice(0, 4).map(id => FOOD_BY_ID[id].emoji).join('');
       let status = 'ריק';
       if (info.treat) status = '🎉 פינוק';
@@ -222,18 +222,23 @@
       else if (info.complete) status = '✅ מושלם';
       else if (!info.empty) status = '⏳ עוד קצת';
       btn.innerHTML = `
-        ${weekOffset === 0 && d === today.getDay() ? '<span class="today-tag">היום</span>' : ''}
-        <span class="day-name">${DAYS[d]}</span>
+        ${isToday ? '<span class="today-tag">היום</span>' : ''}
+        <span class="day-name">${DAYS[date.getDay()]}</span>
+        <span class="day-date">${shortDate(date)}</span>
         <span class="day-foods">${uniq || '·'}</span>
         <span class="day-status">${status}</span>`;
-      btn.addEventListener('click', () => { selectedDay = d; render(); });
+      btn.addEventListener('click', () => { goDay(o); });
       nav.appendChild(btn);
     }
+    $('#btn-day-prev').disabled = daysFromToday(selectedDate) <= MIN_DAYS;
+    $('#btn-day-next').disabled = daysFromToday(selectedDate) >= MAX_DAYS;
+    const active = nav.querySelector('.day.active');
+    if (active && nav.scrollWidth > nav.clientWidth) active.scrollIntoView({ inline: 'center', block: 'nearest' });
   }
 
   function renderPlate() {
-    const info = dayInfo(selectedDay);
-    $('#day-title').textContent = `🍽️ ארוחת ערב של יום ${DAYS[selectedDay]}`;
+    const info = dayInfo(selectedDate);
+    $('#day-title').textContent = `🍽️ ארוחת ערב של יום ${DAYS[selectedDate.getDay()]} · ${shortDate(selectedDate)}`;
     const plate = $('#plate');
     plate.innerHTML = '';
     if (info.empty) {
@@ -254,7 +259,7 @@
   }
 
   function renderStatus() {
-    const info = dayInfo(selectedDay);
+    const info = dayInfo(selectedDate);
     const el = $('#status');
     el.className = 'status';
     if (info.treat) {
@@ -283,7 +288,7 @@
   }
 
   function renderBars() {
-    const info = dayInfo(selectedDay);
+    const info = dayInfo(selectedDate);
     const bars = $('#bars');
     // build once, then only update — keeps the CSS width transition
     if (!bars.children.length) {
@@ -325,7 +330,7 @@
 
     const nutTabs = $('#nutrient-tabs');
     nutTabs.innerHTML = '';
-    const info = dayInfo(selectedDay);
+    const info = dayInfo(selectedDate);
     NUTRIENTS.forEach((n, i) => {
       const b = document.createElement('button');
       const done = !info.treat && !info.solo && info.totals[i] >= n.target;
@@ -345,7 +350,7 @@
   }
 
   function renderGrid() {
-    const info = dayInfo(selectedDay);
+    const info = dayInfo(selectedDate);
     const s = state.settings;
     const grid = $('#grid');
     grid.innerHTML = '';
@@ -365,7 +370,7 @@
           a.name.localeCompare(b.name, 'he'));
     }
 
-    const treatsLeft = treatDaysUsed(selectedDay) < s.treatNights;
+    const treatsLeft = treatDaysUsed(selectedDate) < s.treatNights;
     foods.forEach(f => {
       const selected = info.items.includes(f.id);
       let disabled = false;
@@ -480,12 +485,12 @@
   // summary
   function weekText() {
     const lines = [`🍽️ ארוחות ערב · ${weekRange()}`, ''];
-    for (let d = 0; d < 7; d++) {
-      const info = dayInfo(d);
+    weekDates().forEach((date, d) => {
+      const info = dayInfo(date);
       const mark = info.treat ? ' 🎉' : info.solo ? ' 🍽️' : info.complete ? ' ✅' : info.empty ? '' : ' ⏳';
       const foods = info.items.map(id => `${FOOD_BY_ID[id].emoji} ${FOOD_BY_ID[id].name}`).join(' · ') || '—';
-      lines.push(`יום ${DAYS[d]}: ${foods}${mark}`);
-    }
+      lines.push(`יום ${DAYS[d]} ${shortDate(date)}: ${foods}${mark}`);
+    });
     return lines.join('\n');
   }
 
@@ -515,35 +520,41 @@
     $('#summary-title').textContent = `📋 ארוחות ${name || weekRange()}`;
     const body = $('#summary-body');
     body.innerHTML = '';
-    for (let d = 0; d < 7; d++) {
-      const info = dayInfo(d);
+    weekDates().forEach((date, d) => {
+      const info = dayInfo(date);
       const foods = info.items.map(id => `${FOOD_BY_ID[id].emoji} ${FOOD_BY_ID[id].name}`).join(' · ');
       const status = info.treat ? '🎉' : info.solo ? '🍽️' : info.complete ? '✅' : info.empty ? '▫️' : '⏳';
       const row = document.createElement('div');
       row.className = 'summary-day';
       row.innerHTML = `
-        <div class="sd-name">יום ${DAYS[d]}</div>
+        <div class="sd-name">יום ${DAYS[d]}<br><span class="muted">${shortDate(date)}</span></div>
         <div class="sd-foods">${foods || '<span class="muted">עוד לא נבחר</span>'}</div>
         <div class="sd-status">${status}</div>`;
       body.appendChild(row);
-    }
+    });
     openModal('#modal-summary');
   });
   $('#btn-print').addEventListener('click', () => window.print());
 
   $('#btn-clear').addEventListener('click', clearDay);
 
-  function goWeek(delta) {
-    const next = Math.max(MIN_OFFSET, Math.min(MAX_OFFSET, weekOffset + delta));
-    if (next === weekOffset) return;
-    weekOffset = next;
-    if (weekOffset !== 0) selectedDay = 0;
-    else selectedDay = today.getDay();
+  function goDay(delta) {
+    const next = Math.max(MIN_DAYS, Math.min(MAX_DAYS, daysFromToday(selectedDate) + delta));
+    if (next === daysFromToday(selectedDate)) return;
+    selectedDate = addDays(today, next);
     closeModals();
     render();
   }
-  $('#btn-week-prev').addEventListener('click', () => goWeek(-1));
-  $('#btn-week-next').addEventListener('click', () => goWeek(1));
+  $('#btn-day-prev').addEventListener('click', () => goDay(-1));
+  $('#btn-day-next').addEventListener('click', () => goDay(1));
+  // חיצים במקלדת: בעברית שמאל = קדימה בזמן, ימין = אחורה
+  document.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+    if (document.querySelector('.modal:not(.hidden)')) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goDay(1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); goDay(-1); }
+  });
 
   // ---------- sign-in / sharing ----------
   const gate = $('#gate');

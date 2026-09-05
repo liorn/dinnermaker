@@ -55,7 +55,7 @@ Everything editable is in **`foods.js`**:
 
 ## Using it
 
-- **⬅️ / ➡️ next to the date** move between weeks (2 back, 4 ahead), so next week can be planned in advance. Each week is stored separately; empty weeks aren't saved.
+- **The day strip** shows the selected day in the middle with three days on each side; today is highlighted. The arrows at both ends (or the keyboard's ⬅️ / ➡️) move one day at a time, two weeks back to four weeks ahead. Each Sunday–Saturday week is stored separately; empty weeks aren't saved.
 - **📋 → 📄 העתקה** copies the whole week you're currently viewing to the clipboard as plain text (one line per day).
 - **Filtering by nutrient**: tap a nutrition bar, one of the colored nutrient chips above the food grid, or a "חסר עוד" chip in the status line. The grid then shows only foods that provide that nutrient, strongest first, with the amount shown on each card. Tap again to clear. Whole dinners are excluded while filtering, since they don't fill bars.
 
@@ -65,5 +65,5 @@ Everything editable is in **`foods.js`**:
 - Tap a food to add it, tap again to remove it (one portion per food).
 - Foods are sorted by rating (highest first); unrated ones come last.
 - A day is ✅ when all bars reach their target, 🍽️ when a whole dinner is chosen, 🎉 on a treat night.
-- Only `treatNights` treat days are allowed per week; extra treat foods are greyed out. Pizza nights are unlimited.
+- Only `treatNights` (default 1) treat days are allowed per Sunday–Saturday week; extra treat foods are greyed out. Pizza nights are unlimited.
 - 📋 shows the whole week (printable) for the parents.

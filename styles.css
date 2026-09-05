@@ -31,20 +31,6 @@ h1, h2 { margin: 0; }
   padding: 14px 20px 6px;
 }
 .top h1 { font-size: 26px; font-weight: 800; letter-spacing: -.3px; }
-.top-meta { display: flex; gap: 8px; flex-wrap: wrap; }
-.top-actions { margin-inline-start: auto; display: flex; gap: 6px; }
-.pill {
-  background: #fff; border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 500;
-  box-shadow: var(--shadow);
-}
-.pill.warn { background: #ffe9e3; }
-.week-nav { display: flex; align-items: center; gap: 4px; }
-.week-arrow {
-  width: 30px; height: 30px; border-radius: 50%; background: #fff; box-shadow: var(--shadow);
-  font-size: 12px; display: grid; place-items: center; transition: transform .15s;
-}
-.week-arrow:hover:not(:disabled) { transform: scale(1.12); }
-.week-arrow:disabled { opacity: .3; cursor: default; box-shadow: none; }
 .icon-btn {
   width: 42px; height: 42px; border-radius: 50%; font-size: 20px; background: #fff;
   box-shadow: var(--shadow); display: grid; place-items: center; transition: transform .15s;
@@ -52,8 +38,15 @@ h1, h2 { margin: 0; }
 .icon-btn:hover { transform: scale(1.08); }
 
 /* ---------- days strip ---------- */
+.days-nav { display: flex; align-items: center; gap: 8px; padding: 10px 20px 4px; }
+.day-arrow {
+  flex: none; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: var(--shadow);
+  font-size: 13px; display: grid; place-items: center; transition: transform .15s;
+}
+.day-arrow:hover:not(:disabled) { transform: scale(1.12); }
+.day-arrow:disabled { opacity: .3; cursor: default; box-shadow: none; }
 .days {
-  display: flex; gap: 8px; padding: 10px 20px 4px; overflow-x: auto; scrollbar-width: none;
+  flex: 1; min-width: 0; display: flex; gap: 8px; padding: 10px 4px 4px; overflow-x: auto; scrollbar-width: none;
 }
 .days::-webkit-scrollbar { display: none; }
 .day {
@@ -64,7 +57,10 @@ h1, h2 { margin: 0; }
 }
 .day:hover { transform: translateY(-2px); }
 .day.active { border-color: var(--accent); }
+.day.today { background: #fff3e0; }
+.day.today .day-name { color: #c2410c; }
 .day .day-name { font-weight: 700; font-size: 15px; }
+.day .day-date { font-size: 12px; font-weight: 500; color: var(--muted); margin-top: -3px; }
 .day .day-foods { font-size: 18px; line-height: 1; min-height: 22px; letter-spacing: -2px; }
 .day .day-status { font-size: 13px; font-weight: 500; color: var(--muted); }
 .day.done .day-status { color: #0a9c73; }

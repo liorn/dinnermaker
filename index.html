@@ -13,14 +13,6 @@
 
 <header class="top">
   <h1>🍽️ בונים ארוחת ערב</h1>
-  <div class="top-meta">
-    <div class="week-nav">
-      <button id="btn-week-prev" class="week-arrow" aria-label="שבוע קודם">▶</button>
-      <span id="week-label" class="pill"></span>
-      <button id="btn-week-next" class="week-arrow" aria-label="שבוע הבא">◀</button>
-    </div>
-    <span id="treat-counter" class="pill"></span>
-  </div>
   <div class="top-actions">
     <button id="btn-summary" class="icon-btn" title="סיכום השבוע" aria-label="סיכום השבוע">📋</button>
     <button id="btn-settings" class="icon-btn" title="הגדרות" aria-label="הגדרות">⚙️</button>
@@ -28,7 +20,11 @@
   </div>
 </header>
 
-<nav class="days" id="days" aria-label="ימי השבוע"></nav>
+<nav class="days-nav" aria-label="ימים">
+  <button id="btn-day-prev" class="day-arrow" aria-label="יום קודם">▶</button>
+  <div class="days" id="days"></div>
+  <button id="btn-day-next" class="day-arrow" aria-label="יום הבא">◀</button>
+</nav>
 
 <main class="layout">
   <section class="plate-section card">
