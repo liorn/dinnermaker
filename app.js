@@ -23,12 +23,49 @@
     } catch (e) { /* ignore */ }
     return { settings: { ...SETTINGS_DEFAULT }, plans: {} };
   }
-  function saveState() {
+  function serialize() {
     // don't persist weeks that ended up empty — they're recreated on demand
     const plans = {};
     Object.entries(state.plans).forEach(([k, w]) => { if (w.days.some(d => d.length)) plans[k] = w; });
     Object.keys(plans).sort().slice(0, -12).forEach(k => delete plans[k]);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings: state.settings, plans })); } catch (e) { /* ignore */ }
+    return { settings: state.settings, plans };
+  }
+  function saveLocal(data) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { /* ignore */ }
+  }
+  function saveState() {
+    const data = serialize();
+    saveLocal(data);
+    Sync.save(data);
+  }
+  // Firebase drops empty arrays and may turn sparse arrays into objects — rebuild the
+  // exact shape app code expects: plans[week].days = 7 arrays of food ids.
+  function normalizeRemote(data) {
+    const plans = {};
+    Object.entries((data && data.plans) || {}).forEach(([k, w]) => {
+      const src = (w && w.days) || {};
+      const days = [];
+      for (let d = 0; d < 7; d++) {
+        const v = src[d];
+        days.push(Array.isArray(v) ? v.filter(Boolean) : v && typeof v === 'object' ? Object.values(v) : []);
+      }
+      plans[k] = { days };
+    });
+    return { settings: { ...SETTINGS_DEFAULT, ...((data && data.settings) || {}) }, plans };
+  }
+  function applyRemote(data) {
+    if (data === null || data === undefined) {
+      // first sign-in for this group: seed the shared plan with whatever this browser has
+      Sync.save(serialize());
+      return;
+    }
+    const next = normalizeRemote(data);
+    if (JSON.stringify(next) === JSON.stringify(serialize())) return;
+    state.settings = next.settings;
+    state.plans = next.plans;
+    normalized.clear();
+    saveLocal(next);
+    render();
   }
 
   const state = loadState();
@@ -507,6 +544,42 @@
   }
   $('#btn-week-prev').addEventListener('click', () => goWeek(-1));
   $('#btn-week-next').addEventListener('click', () => goWeek(1));
+
+  // ---------- sign-in / sharing ----------
+  const gate = $('#gate');
+  function showGate(kind, user) {
+    gate.classList.remove('hidden');
+    $('#gate-signin').classList.toggle('hidden', kind !== 'signed-out');
+    $('#gate-denied').classList.toggle('hidden', kind !== 'denied');
+    $('#gate-error').classList.toggle('hidden', kind !== 'error');
+    $('#gate-email').textContent = user && user.email ? user.email : '';
+  }
+  function setAccount(user) {
+    const btn = $('#btn-user');
+    const img = $('#user-photo');
+    btn.classList.toggle('hidden', !user);
+    if (user) {
+      img.src = user.photoURL || '';
+      img.alt = user.displayName || user.email || '';
+      $('#account-name').textContent = user.displayName || '';
+      $('#account-email').textContent = user.email || '';
+    }
+    $('#account-row').classList.toggle('hidden', !user);
+  }
+  $('#gate-signin-btn').addEventListener('click', () => Sync.signIn());
+  document.querySelectorAll('.btn-signout').forEach(b => b.addEventListener('click', () => Sync.signOut()));
+  $('#btn-user').addEventListener('click', () => $('#btn-settings').click());
+
+  Sync.start({
+    onData: applyRemote,
+    onAuth: (status, user, err) => {
+      if (err) console.warn('[sync]', status, err);
+      setAccount(user || null);
+      if (status === 'local' || status === 'signed-in') gate.classList.add('hidden');
+      else showGate(status, user);
+      if (status === 'error') toast('בעיה בסנכרון 😕');
+    },
+  });
 
   render();
 })();

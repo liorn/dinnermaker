@@ -24,6 +24,7 @@
   <div class="top-actions">
     <button id="btn-summary" class="icon-btn" title="סיכום השבוע" aria-label="סיכום השבוע">📋</button>
     <button id="btn-settings" class="icon-btn" title="הגדרות" aria-label="הגדרות">⚙️</button>
+    <button id="btn-user" class="icon-btn user-btn hidden" aria-label="חשבון"><img id="user-photo" alt="" referrerpolicy="no-referrer"></button>
   </div>
 </header>
 
@@ -64,6 +65,31 @@
     </label>
     <hr>
     <button id="btn-reset-week" class="danger-btn">🔄 להתחיל את השבוע מחדש</button>
+    <div id="account-row" class="account-row hidden">
+      <div class="account-text">
+        <div id="account-name"></div>
+        <div id="account-email" class="muted"></div>
+      </div>
+      <button class="small-btn btn-signout">יציאה</button>
+    </div>
+  </div>
+</div>
+
+<!-- sign-in gate -->
+<div class="modal hidden" id="gate">
+  <div class="modal-box card gate-box">
+    <h2>🍽️ בונים ארוחת ערב</h2>
+    <div id="gate-signin">
+      <button id="gate-signin-btn" class="big-btn">כניסה עם Google</button>
+    </div>
+    <div id="gate-denied" class="hidden">
+      <p>החשבון <b id="gate-email"></b> לא נמצא ברשימת המשפחה 🙈</p>
+      <button class="small-btn btn-signout">כניסה עם חשבון אחר</button>
+    </div>
+    <div id="gate-error" class="hidden">
+      <p>משהו השתבש בחיבור 😕</p>
+      <button class="small-btn btn-signout">לנסות שוב</button>
+    </div>
   </div>
 </div>
 
@@ -86,6 +112,11 @@
 <div id="celebrate" class="celebrate hidden" aria-live="polite"></div>
 <div id="toast" class="toast hidden" aria-live="polite"></div>
 
+<script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
 <script src="foods.js"></script>
 <script src="app.js"></script>
 </body>

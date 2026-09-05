@@ -11,7 +11,26 @@ No build step. Either double-click `index.html`, or:
 python3 -m http.server 8000   # then open http://localhost:8000
 ```
 
-All state (weekly plan + settings) lives in the browser's `localStorage`.
+State (weekly plan + settings) is cached in the browser's `localStorage` and, once
+Firebase is configured, shared through a Firebase Realtime Database behind Google sign-in.
+Without `FIREBASE_CONFIG` the app runs local-only.
+
+## Sharing between devices (Firebase)
+
+One-time setup in the [Firebase console](https://console.firebase.google.com):
+
+1. Create a project. Add a **Web app** and copy its config object into `firebase-config.js`.
+2. **Authentication → Sign-in method**: enable **Google**.
+   **Authentication → Settings → Authorized domains**: add the site's domain.
+3. **Realtime Database → Create database** (locked mode). Put the `databaseURL` in `firebase-config.js`.
+4. Deploy the rules: `npx firebase-tools deploy --only database` (uses `firebase.json`).
+5. **Realtime Database → Data**: create `groups/family/members` with one child per allowed
+   Google account, key = email with `.` replaced by `,` (e.g. `someone@gmail,com`), value `true`.
+
+Access is per group. The member list lives only in the database, never in this repo, and can
+only be edited in the console (the rules deny client writes there). To add someone, add their
+email as a new key under `members`. To start a second, separate plan, add another group in the
+database and point `GROUP_ID` in `firebase-config.js` at it.
 
 ## Edit the food list
 

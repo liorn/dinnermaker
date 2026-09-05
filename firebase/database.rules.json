@@ -1,0 +1,19 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "groups": {
+      "$group": {
+        "members": {
+          ".read": false,
+          ".write": false
+        },
+        "plan": {
+          ".read": "auth != null && auth.token.email_verified == true && root.child('groups').child($group).child('members').child(auth.token.email.toLowerCase().replace('.', ',')).val() == true",
+          ".write": "auth != null && auth.token.email_verified == true && root.child('groups').child($group).child('members').child(auth.token.email.toLowerCase().replace('.', ',')).val() == true",
+          ".validate": "newData.hasChildren(['settings'])"
+        }
+      }
+    }
+  }
+}

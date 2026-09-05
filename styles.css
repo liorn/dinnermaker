@@ -207,6 +207,17 @@ hr { border: 0; border-top: 2px solid var(--line); margin: 12px 0; }
 .danger-btn { width: 100%; background: #ffe9e3; color: #c2410c; font-weight: 700; padding: 12px; border-radius: 14px; }
 .danger-btn.confirm { background: #c2410c; color: #fff; }
 
+/* ---------- account / sign-in ---------- */
+.user-btn { padding: 0; overflow: hidden; }
+.user-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.account-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 2px solid var(--line); }
+.account-text { min-width: 0; font-weight: 500; }
+.account-text .muted { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; }
+.gate-box { text-align: center; display: grid; gap: 16px; }
+.gate-box h2 { font-size: 22px; font-weight: 800; }
+.gate-box p { line-height: 1.6; }
+.big-btn { background: var(--accent, #ff7a59); color: #fff; font-weight: 700; font-size: 18px; padding: 14px 24px; border-radius: 16px; box-shadow: var(--shadow); }
+
 .summary-day { display: grid; grid-template-columns: 80px 1fr 40px; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 2px solid var(--line); }
 .summary-day:last-child { border-bottom: 0; }
 .summary-day .sd-name { font-weight: 700; }
