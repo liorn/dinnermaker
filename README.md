@@ -7,6 +7,9 @@ She picks foods, nutrition "bars" fill up, and a dinner is done when every bar i
 
 No build step. Either double-click `index.html`, or:
 
+When you change any `.js`/`.css` file, bump the `?v=` tag on its `<script>`/`<link>` in
+`index.html` so browsers (and the GitHub Pages cache) don't mix old and new files.
+
 ```bash
 python3 -m http.server 8000   # then open http://localhost:8000
 ```
